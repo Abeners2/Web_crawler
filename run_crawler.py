@@ -112,7 +112,7 @@ def extract_technologies(soup):
 
 def find_login_pages(links):
     login_pages = []
-    keywords = ['login', 'signin', 'account', 'admin']
+    keywords = ['login', 'signin', 'account', 'admin', 'administrador', 'pass', 'password']
 
     for link in links:
         for keyword in keywords:
@@ -159,13 +159,13 @@ def process_url(url, depth):
 
     result = {
         'url': url,
-        'title': soup.title.string if soup.title else 'No Title',
+        'titulo': soup.title.string if soup.title else 'Sem Titulo',
         'links': links,
-        'images': images,
-        'technologies': technologies,
-        'login_pages': login_pages,
-        'database_references': database_references,
-        'depth': depth
+        'imagens': images,
+        'tecnologias': technologies,
+        'paginas_de_login': login_pages,
+        'referencias_de_banco_de_dados': database_references,
+        'profundidade': depth
     }
 
     return result
@@ -198,21 +198,21 @@ def search_data(data, query):
 def display_results(data):
     for item in data:
         print(f"\nURL: {item['url']}")
-        print(f"Title: {item['title']}")
-        print(f"Links found: {len(item['links'])}")
+        print(f"Titulo: {item['titulo']}")
+        print(f"Links encontrados: {len(item['links'])}")
         for link in item['links']:
             print(link)
-        print(f"Images found: {len(item['images'])}")
-        for img in item['images']:
+        print(f"Imagens encontradas: {len(item['imagens'])}")
+        for img in item['imagens']:
             print(img)
-        print(f"Technologies found: {len(item['technologies'])}")
-        for tech in item['technologies']:
+        print(f"Tecnologias encontradas: {len(item['tecnologias'])}")
+        for tech in item['tecnologias']:
             print(tech)
-        print(f"Login pages found: {len(item['login_pages'])}")
-        for page in item['login_pages']:
+        print(f"Paginas de Login encontradas: {len(item['paginas_de_login'])}")
+        for page in item['paginas_de_login']:
             print(page)
-        print(f"Database references found: {len(item['database_references'])}")
-        for db in item['database_references']:
+        print(f"Referencias de banco de dados: {len(item['referencias_de_banco_de_dados'])}")
+        for db in item['referencias_de_banco_de_dados']:
             print(db)
         print("-" * 80)
 
@@ -231,43 +231,43 @@ def main(url, max_depth=2, max_urls=100):
                     result = future.result()
                     if result:
                         results.append(result)
-                        queue.extend([(link, result['depth'] + 1) for link in result['links'] if is_internal_link(link, url) and result['depth'] < max_depth])
+                        queue.extend([(link, result['profundidade'] + 1) for link in result['links'] if is_internal_link(link, url) and result['profundidade'] < max_depth])
                         processed_urls += 1
                 except Exception as e:
-                    print(f"Error processing URL: {e}")
+                    print(f"Erro processando URL: {e}")
 
-    print("\nCrawler finished. Data collected.")
+    print("\nCrawler Terminou. Dados Coletados.")
 
     # Exibir resultados da coleta de dados
     display_results(results)
 
     # Permitir ao usuário realizar filtros e buscas
     while True:
-        print("\nOptions:")
-        print("1. Filter data")
-        print("2. Search data")
-        print("3. Exit")
+        print("\nOpções:")
+        print("1. Filtrar dados")
+        print("2. Procurar dados")
+        print("3. Sair")
 
-        choice = input("Choose an option: ")
+        choice = input("Escolha uma opção: ")
 
         if choice == '1':
             filters = {}
-            print("\nEnter filters (leave empty to skip):")
-            title_filter = input("Title contains: ")
+            print("\nInsira os filtros (Deixe vazio para pular):")
+            title_filter = input("O titulo contém: ")
             if title_filter:
-                filters['title'] = title_filter
-            url_filter = input("URL contains: ")
+                filters['titulo'] = title_filter
+            url_filter = input("URL contém: ")
             if url_filter:
                 filters['url'] = url_filter
-            tech_filter = input("Technologies contains: ")
+            tech_filter = input("Tecnologia contém: ")
             if tech_filter:
-                filters['technologies'] = tech_filter
+                filters['tecnologias'] = tech_filter
 
             filtered_results = filter_data(results, filters)
             display_results(filtered_results)
 
         elif choice == '2':
-            query = input("\nEnter search query: ")
+            query = input("\nInsira a consulta de pesquisa: ")
             search_results = search_data(results, query)
             display_results(search_results)
 
@@ -275,12 +275,12 @@ def main(url, max_depth=2, max_urls=100):
             break
 
         else:
-            print("Invalid choice, please try again.")
+            print("Escolha Invalida, Por favor tente novamente.")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Por favor, forneça a URL do site que deseja buscar.")
-        print("Exemplo de uso: python run_crawler.py http://www.example.com")
+        print("Exemplo de uso: python run_crawler.py http://www.exemplo.com")
     else:
         url = sys.argv[1]
         main(url)
