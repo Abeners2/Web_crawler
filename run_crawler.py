@@ -215,7 +215,7 @@ def display_results(data):
         print(f"Referencias de banco de dados: {len(item['referencias_de_banco_de_dados'])}")
         for db in item['referencias_de_banco_de_dados']:
             print(db)
-        print("-" * 80)
+        print(Style.RESET_ALL + "-" * 80)
 
 def main(url, max_depth=2, max_urls=100):
     global visited_urls
