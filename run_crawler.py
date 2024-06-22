@@ -1,77 +1,145 @@
-# run_crawler.py
-
 import sys
 import requests
 from bs4 import BeautifulSoup
+import re
 
-def crawl_website(url):
+def fetch_page(url):
     try:
-        # Faz a requisição GET para a URL
-        response = requests.get(url)
-        response.raise_for_status()  # Verifica por erros na requisição
-
-        # Cria o objeto BeautifulSoup
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        # Encontra todos os links na página
-        links = [link.get('href') for link in soup.find_all('a', href=True)]
-
-        # Encontra todas as imagens na página
-        images = [image.get('src') for image in soup.find_all('img', src=True)]
-
-        # Encontra informações sobre tecnologias principais
-        technology_info = find_technology_info(soup)
-
-        return soup, links, images, technology_info
-
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            # Tentar decodificar com diferentes codecs
+            codecs_to_try = ['utf-8', 'iso-8859-1', 'ascii', 'cp1252', 'latin1']  # Exemplos de codecs para tentar
+            for codec in codecs_to_try:
+                try:
+                    content = response.content.decode(codec)
+                    return content
+                except UnicodeDecodeError:
+                    continue  # Tenta o próximo codec se der erro
+            print(f"Failed to decode content from {url}.")
+            return None
+        else:
+            print(f"Failed to fetch {url}. Status code: {response.status_code}")
+            return None
     except requests.exceptions.RequestException as e:
-        print(f"Failed to crawl {url}: {e}")
-        return None, [], [], {}
+        print(f"Failed to fetch {url}. Exception: {str(e)}")
+        return None
 
-def find_technology_info(soup):
-    technology_info = {}
+def extract_links(soup):
+    links = []
+    for link in soup.find_all('a', href=True):
+        links.append(link['href'])
+    return links
 
-    # Procura por informações específicas sobre tecnologia
-    # Exemplo: PHP Version
-    php_version = soup.find(string=lambda text: 'PHP Version' in str(text))
-    if php_version:
-        technology_info['PHP'] = php_version.strip()
+def extract_images(soup):
+    images = []
+    for img in soup.find_all('img', src=True):
+        images.append(img['src'])
+    return images
 
-    # Exemplo: WordPress Version
-    wordpress_version = soup.find(string=lambda text: 'WordPress' in str(text))
-    if wordpress_version:
-        technology_info['WordPress'] = wordpress_version.strip()
+def extract_technologies(soup):
+    technologies = []
+    
+    # Exemplo: Buscando versão do PHP no HTML
+    php_version_tag = soup.find(string=re.compile(r'PHP (\d+\.\d+\.\d+)'))
+    if php_version_tag:
+        technologies.append(f'PHP: {php_version_tag.strip()}')
 
-    # Adicione outras tecnologias conforme necessário
+    # Exemplo: Buscando outras tecnologias
+    # Adicione mais padrões conforme necessário
+    other_technologies = {
+        'WordPress': r'WordPress (\d+\.\d+\.\d+)',
+        'Joomla': r'Joomla! (\d+\.\d+\.\d+)',
+        'Drupal': r'Drupal (\d+\.\d+\.\d+)',
+        'MySQL': r'MySQL (\d+\.\d+\.\d+)',
+        'MongoDB': r'MongoDB (\d+\.\d+\.\d+)',
+        'PostgreSQL': r'PostgreSQL (\d+\.\d+\.\d+)',
+    }
 
-    return technology_info
+    for tech, pattern in other_technologies.items():
+        tag = soup.find(string=re.compile(pattern))
+        if tag:
+            technologies.append(f'{tech}: {tag.strip()}')
+
+    return technologies
+
+def find_login_pages(links):
+    login_pages = []
+    keywords = ['login', 'signin', 'account', 'admin']
+    
+    for link in links:
+        for keyword in keywords:
+            if keyword in link.lower():
+                login_pages.append(link)
+                break
+    
+    return login_pages
+
+def find_database_references(content):
+    databases = []
+    keywords = ['mysql', 'mongodb', 'sql server', 'postgresql']
+    
+    for keyword in keywords:
+        if keyword in content.lower():
+            databases.append(keyword)
+    
+    return databases
 
 def main():
     if len(sys.argv) < 2:
-        print("Por favor, forneça a URL do site HTTPS que deseja buscar.")
-        print("Exemplo de uso: python run_crawler.py https://www.example.com")
+        print("Por favor, forneça a URL do site que deseja buscar.")
+        print("Exemplo de uso: python run_crawler.py http://www.example.com")
         return
 
     url = sys.argv[1]
 
-    # Chama a função crawl_website para buscar informações na página
-    soup, links, images, technology_info = crawl_website(url)
+    # Fetch da página web
+    page_content = fetch_page(url)
+    if not page_content:
+        return
 
-    if soup:
-        # Mostra informações para o usuário
-        print(f"Title of the page: {soup.title.string}")
-        print("Links found:")
-        for link in links:
-            print(link)
-        print("\nImages found:")
-        for image in images:
-            print(image)
-        print("\nTechnology information:")
-        for key, value in technology_info.items():
-            print(f"{key}: {value}")
+    # Parsing da página com BeautifulSoup
+    soup = BeautifulSoup(page_content, 'html.parser')
 
+    # Extração de links, imagens e tecnologias
+    links = extract_links(soup)
+    images = extract_images(soup)
+    technologies = extract_technologies(soup)
+
+    # Busca por páginas de login
+    login_pages = find_login_pages(links)
+
+    # Busca por referências a bancos de dados
+    database_references = find_database_references(page_content)
+
+    # Exibindo os resultados
+    print(f"Title of the page: {soup.title.string}")
+    print("\nLinks found:")
+    for link in links:
+        print(link)
+    
+    print("\nImages found:")
+    for img in images:
+        print(img)
+
+    if technologies:
+        print("\nTechnologies found:")
+        for tech in technologies:
+            print(tech)
     else:
-        print(f"Failed to crawl {url}")
+        print("\nNo technology information found.")
+    
+    if login_pages:
+        print("\nLogin pages found:")
+        for page in login_pages:
+            print(page)
+    
+    if database_references:
+        print("\nDatabase references found:")
+        for db in database_references:
+            print(db)
 
 if __name__ == "__main__":
     main()
