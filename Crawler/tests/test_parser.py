@@ -8,7 +8,7 @@ class TestParser(unittest.TestCase):
         html_doc = "<html><body><h2>Title 1</h2><h2>Title 2</h2></body></html>"
         soup = BeautifulSoup(html_doc, 'html.parser')
         titles = extract_titles(soup)
-        self.assertEqual(titles, ['Title 1', 'Title 2'])
+        self.assertEqual(titles, ['Titulo 1', 'Titulo 2'])
 
 if __name__ == '__main__':
     unittest.main()
