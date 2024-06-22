@@ -2,10 +2,10 @@ import sys
 import requests
 from bs4 import BeautifulSoup
 import re
-from colorama import init, Fore, Style
+from urllib.parse import urlparse, urljoin
 
-# Inicializa o colorama para suporte a cores no terminal do Windows
-init()
+# Lista global para armazenar URLs visitadas
+visited_urls = set()
 
 def fetch_page(url):
     try:
@@ -22,23 +22,13 @@ def fetch_page(url):
         print(f"Failed to fetch {url}. Exception: {str(e)}")
         return None
 
-def extract_links(soup):
+def extract_links(soup, base_url):
     links = []
-    hidden_links = []
-
-    # Procurar por links visíveis
     for link in soup.find_all('a', href=True):
-        links.append(link['href'])
-
-    # Procurar por links em elementos ocultos
-    hidden_elements = soup.find_all(lambda tag: tag.has_attr('style') and ('display: none;' in tag['style'] or 'visibility: hidden;' in tag['style']))
-
-    for element in hidden_elements:
-        # Extrair links ocultos
-        for link in element.find_all('a', href=True):
-            hidden_links.append(link['href'])
-
-    return links, hidden_links
+        href = link['href']
+        full_url = urljoin(base_url, href)
+        links.append(full_url)
+    return links
 
 def extract_images(soup):
     images = []
@@ -141,68 +131,93 @@ def find_database_references(content):
 
     return databases
 
-def main():
+def is_internal_link(url, base_url):
+    parsed_url = urlparse(url)
+    parsed_base_url = urlparse(base_url)
+    return parsed_url.netloc == parsed_base_url.netloc
+
+def main(url, max_depth=2, max_urls=100):
+    global visited_urls
+    queue = [(url, 0)]  # Fila de URLs para visitar, com a profundidade atual
+    processed_urls = 0
+
+    while queue and processed_urls < max_urls:
+        url, depth = queue.pop(0)
+
+        if url in visited_urls:
+            continue
+
+        # Fetch da página web
+        page_content = fetch_page(url)
+        if not page_content:
+            continue
+
+        visited_urls.add(url)
+        processed_urls += 1
+
+        # Parsing da página com BeautifulSoup
+        soup = BeautifulSoup(page_content, 'html.parser')
+
+        # Verificação de título
+        if soup.title and soup.title.string:
+            print(f"\nTitle of the page: {soup.title.string}")
+        else:
+            print("\nTitle not found")
+
+        # Extração de links, imagens e tecnologias
+        base_url = urlparse(url).scheme + '://' + urlparse(url).netloc
+        links = extract_links(soup, base_url)
+        images = extract_images(soup)
+        technologies_from_files = extract_technologies_from_files(url)
+        technologies_from_content = extract_technologies(soup)
+
+        # Combinação de todas as tecnologias encontradas
+        technologies = list(set(technologies_from_files + technologies_from_content))
+
+        # Busca por páginas de login
+        login_pages = find_login_pages(links)
+
+        # Busca por referências a bancos de dados
+        database_references = find_database_references(page_content.decode('utf-8', errors='ignore'))
+
+        # Exibindo os resultados da página atual
+        print("\nLinks found:")
+        for link in links:
+            print(link)
+
+        print("\nImages found:")
+        for img in images:
+            print(img)
+
+        if technologies:
+            print("\nTechnologies found:")
+            for tech in technologies:
+                print(tech)
+        else:
+            print("\nNo technology information found.")
+
+        if login_pages:
+            print("\nLogin pages found:")
+            for page in login_pages:
+                print(page)
+
+        if database_references:
+            print("\nDatabase references found:")
+            for db in database_references:
+                print(db)
+
+        # Adicionar links internos à fila, se não ultrapassar a profundidade máxima
+        if depth < max_depth:
+            for link in links:
+                if is_internal_link(link, base_url) and link not in visited_urls:
+                    queue.append((link, depth + 1))
+
+    print("\nCrawler finished.")
+
+if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Por favor, forneça a URL do site que deseja buscar.")
         print("Exemplo de uso: python run_crawler.py http://www.example.com")
-        return
-
-    url = sys.argv[1]
-
-    # Fetch da página web
-    page_content = fetch_page(url)
-    if not page_content:
-        return
-
-    # Parsing da página com BeautifulSoup
-    soup = BeautifulSoup(page_content, 'html.parser')
-
-    # Extração de links, imagens e tecnologias
-    links, hidden_links = extract_links(soup)
-    images = extract_images(soup)
-    technologies_from_files = extract_technologies_from_files(url)
-    technologies_from_content = extract_technologies(soup)
-
-    # Combinação de todas as tecnologias encontradas
-    technologies = list(set(technologies_from_files + technologies_from_content))
-
-    # Busca por páginas de login
-    login_pages = find_login_pages(links + hidden_links)
-
-    # Busca por referências a bancos de dados
-    database_references = find_database_references(page_content.decode('utf-8', errors='ignore'))
-
-    # Exibindo os resultados
-    print(f"Title of the page: {soup.title.string}")
-    print("\nLinks found:")
-    for link in links:
-        print(f"{Fore.BLUE}{link}{Style.RESET_ALL}")  # Adiciona cor ao link
-
-    if hidden_links:
-        print("\nHidden links found:")
-        for link in hidden_links:
-            print(f"{Fore.BLUE}{link}{Style.RESET_ALL}")  # Adiciona cor ao link
-
-    print("\nImages found:")
-    for img in images:
-        print(img)
-
-    if technologies:
-        print("\nTechnologies found:")
-        for tech in technologies:
-            print(tech)
     else:
-        print("\nNo technology information found.")
-
-    if login_pages:
-        print("\nLogin pages found:")
-        for page in login_pages:
-            print(f"{Fore.BLUE}{page}{Style.RESET_ALL}")  # Adiciona cor ao link
-
-    if database_references:
-        print("\nDatabase references found:")
-        for db in database_references:
-            print(db)
-
-if __name__ == "__main__":
-    main()
+        url = sys.argv[1]
+        main(url)
