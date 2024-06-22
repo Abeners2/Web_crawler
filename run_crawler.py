@@ -2,6 +2,10 @@ import sys
 import requests
 from bs4 import BeautifulSoup
 import re
+from colorama import init, Fore, Style
+
+# Inicializa o colorama para suporte a cores no terminal do Windows
+init()
 
 def fetch_page(url):
     try:
@@ -172,12 +176,12 @@ def main():
     print(f"Title of the page: {soup.title.string}")
     print("\nLinks found:")
     for link in links:
-        print(link)
+        print(f"{Fore.BLUE}{link}{Style.RESET_ALL}")  # Adiciona cor ao link
 
     if hidden_links:
         print("\nHidden links found:")
         for link in hidden_links:
-            print(link)
+            print(f"{Fore.BLUE}{link}{Style.RESET_ALL}")  # Adiciona cor ao link
 
     print("\nImages found:")
     for img in images:
@@ -193,7 +197,7 @@ def main():
     if login_pages:
         print("\nLogin pages found:")
         for page in login_pages:
-            print(page)
+            print(f"{Fore.BLUE}{page}{Style.RESET_ALL}")  # Adiciona cor ao link
 
     if database_references:
         print("\nDatabase references found:")
