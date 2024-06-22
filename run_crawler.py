@@ -17,10 +17,10 @@ def fetch_page(url):
         if response.status_code == 200:
             return response.content
         else:
-            print(f"Failed to fetch {url}. Status code: {response.status_code}")
+            print(f"Falha ao buscar {url}. Codigo do estado: {response.status_code}")
             return None
     except requests.exceptions.RequestException as e:
-        print(f"Failed to fetch {url}. Exception: {str(e)}")
+        print(f"Falha ao buscar {url}. Exceção: {str(e)}")
         return None
 
 def extract_links(soup, base_url):
