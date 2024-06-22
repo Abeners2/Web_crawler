@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse, urljoin
 from concurrent.futures import ThreadPoolExecutor
+from colorama import Fore, Style
 
 # Lista global para armazenar URLs visitadas
 visited_urls = set()
@@ -197,7 +198,7 @@ def search_data(data, query):
 
 def display_results(data):
     for item in data:
-        print(f"\nURL: {item['url']}")
+        print(Fore.GREEN + f"\nURL: {item['url']}")
         print(f"Titulo: {item['titulo']}")
         print(f"Links encontrados: {len(item['links'])}")
         for link in item['links']:
@@ -214,7 +215,7 @@ def display_results(data):
         print(f"Referencias de banco de dados: {len(item['referencias_de_banco_de_dados'])}")
         for db in item['referencias_de_banco_de_dados']:
             print(db)
-        print("-" * 80)
+        print(Style.RESET_ALL + "-" * 80)
 
 def main(url, max_depth=2, max_urls=100):
     global visited_urls
