@@ -1,4 +1,6 @@
 # web_crawler/crawler/parser.py
+from bs4 import BeautifulSoup
+
 def extract_titles(soup):
     titles = soup.find_all('h2')
     return [title.get_text() for title in titles]
