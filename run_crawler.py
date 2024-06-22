@@ -6,7 +6,6 @@ from urllib.parse import urlparse, urljoin
 from concurrent.futures import ThreadPoolExecutor
 from colorama import Fore, Style
 
-# Lista global para armazenar URLs visitadas
 visited_urls = set()
 
 def fetch_page(url):
@@ -41,7 +40,7 @@ def extract_images(soup):
 def extract_technologies_from_files(page_url):
     technologies = []
 
-    # Fetch da página web
+    # Busca da página web
     page_content = fetch_page(page_url)
     if not page_content:
         return technologies
@@ -113,7 +112,7 @@ def extract_technologies(soup):
 
 def find_login_pages(links):
     login_pages = []
-    keywords = ['login', 'signin', 'account', 'admin', 'administrador', 'pass', 'password']
+    keywords = ['login', 'signin', 'account', 'admin', 'administrador', 'pass', 'password', 'entrar', 'conta']
 
     for link in links:
         for keyword in keywords:
@@ -125,7 +124,7 @@ def find_login_pages(links):
 
 def find_database_references(content):
     databases = []
-    keywords = ['mysql', 'mongodb', 'sql server', 'postgresql']
+    keywords = ['mysql', 'mongodb', 'sql server', 'postgresql', 'sql']
 
     for keyword in keywords:
         if keyword in content.lower():
@@ -219,9 +218,9 @@ def display_results(data):
 
 def main(url, max_depth=2, max_urls=100):
     global visited_urls
-    queue = [(url, 0)]  # Fila de URLs para visitar, com a profundidade atual
+    queue = [(url, 0)] 
     processed_urls = 0
-    results = []  # Lista para armazenar os dados extraídos
+    results = []  
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         while queue and processed_urls < max_urls:
@@ -239,10 +238,8 @@ def main(url, max_depth=2, max_urls=100):
 
     print("\nCrawler Terminou. Dados Coletados.")
 
-    # Exibir resultados da coleta de dados
     display_results(results)
 
-    # Permitir ao usuário realizar filtros e buscas
     while True:
         print("\nOpções:")
         print("1. Filtrar dados")
