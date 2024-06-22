@@ -3,12 +3,13 @@
 Este é um crawler Python para buscar e analisar informações em páginas web.
 Utiliza BeautifulSoup e requests para coletar links, imagens, tecnologias, páginas de login e referências a bancos de dados a partir de uma URL fornecida.
 
-> **Atenção:**
-> Este projeto é destinado exclusivamente para fins educacionais e de desenvolvimento. Ao usar este web crawler, é importante estar ciente dos seguintes pontos:
-> O autor deste projeto não se responsabiliza pelo uso indevido ou não autorizado do software. É responsabilidade do usuário garantir que o uso do crawler esteja em conformidade com as políticas de uso aceitável dos sites que são acessados.
-> O uso excessivo ou inadequado do crawler pode sobrecarregar os servidores de um site, o que pode ser interpretado como um ataque de negação de serviço (DoS). Portanto, utilize-o com moderação e respeite as diretrizes de robots.txt e os termos de serviço dos sites visitados.
-> Verifique as leis e regulamentos locais e internacionais antes de usar este software para garantir que não viole nenhuma legislação sobre privacidade, direitos autorais ou proteção de dados.
-
+**Atenção:**
+```Diff
+Este projeto é destinado exclusivamente para fins educacionais e de desenvolvimento. Ao usar este web crawler, é importante estar ciente dos seguintes pontos:
+- O autor deste projeto não se responsabiliza pelo uso indevido ou não autorizado do software. É responsabilidade do usuário garantir que o uso do crawler esteja em conformidade com as políticas de uso aceitável dos sites que são acessados.
+- O uso excessivo ou inadequado do crawler pode sobrecarregar os servidores de um site, o que pode ser interpretado como um ataque de negação de serviço (DoS). Portanto, utilize-o com moderação e respeite as diretrizes de robots.txt e os termos de serviço dos sites visitados.
+- Verifique as leis e regulamentos locais e internacionais antes de usar este software para garantir que não viole nenhuma legislação sobre privacidade, direitos autorais ou proteção de dados.
+```
 ## Instalação
 
 1. Clone o repositório:
