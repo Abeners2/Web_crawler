@@ -1,3 +1,4 @@
+# web_crawler/crawler/crawler.py
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
