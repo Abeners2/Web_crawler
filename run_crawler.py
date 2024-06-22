@@ -29,13 +29,22 @@ def crawl_website(url):
         return None, [], [], {}
 
 def find_technology_info(soup):
-    # Implemente a lógica para buscar informações específicas como versões de PHP, WordPress, etc.
-    # Exemplo simples para encontrar versão de PHP
+    technology_info = {}
+
+    # Procura por informações específicas sobre tecnologia
+    # Exemplo: PHP Version
     php_version = soup.find(string=lambda text: 'PHP Version' in str(text))
     if php_version:
-        return {'PHP': php_version.strip()}  # Retorna um dicionário com a informação encontrada
-    else:
-        return {}
+        technology_info['PHP'] = php_version.strip()
+
+    # Exemplo: WordPress Version
+    wordpress_version = soup.find(string=lambda text: 'WordPress' in str(text))
+    if wordpress_version:
+        technology_info['WordPress'] = wordpress_version.strip()
+
+    # Adicione outras tecnologias conforme necessário
+
+    return technology_info
 
 def main():
     if len(sys.argv) < 2:
