@@ -8,10 +8,10 @@ def fetch_page(url):
         if response.status_code == 200:
             return response.content
         else:
-            print(f"Failed to fetch {url}. Status code: {response.status_code}")
+            print(f"Falha ao buscar {url}. Código do estado: {response.status_code}")
             return None
     except requests.RequestException as e:
-        print(f"Failed to fetch {url}: {e}")
+        print(f"Falha ao buscar {url}: {e}")
         return None
 
 def parse_html(content):
