@@ -14,7 +14,7 @@ Este projeto é destinado exclusivamente para fins educacionais e de desenvolvim
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/crawler-web.git
+git clone https://github.com/Abeners2/Web_crawler.git
 ```
 2. Instale as dependências:
 ```bash
