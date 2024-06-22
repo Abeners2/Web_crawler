@@ -4,7 +4,7 @@ from crawler.crawler import fetch_page
 
 class TestCrawler(unittest.TestCase):
     def test_fetch_page(self):
-        url = 'http://example.com'
+        url = 'http://exemplo.com'
         page_content = fetch_page(url)
         self.assertIsNotNone(page_content)
 
