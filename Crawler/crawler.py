@@ -1,40 +1,49 @@
-# crawler.py
-
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
-def fetch_page(url, headers=None):
+def fetch_page(url):
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raises an exception for HTTP errors different from 200
-        return response.content
-    except requests.exceptions.RequestException as e:
-        print(f'Failed to retrieve the web page: {e}')
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.content
+        else:
+            print(f"Failed to fetch {url}. Status code: {response.status_code}")
+            return None
+    except requests.RequestException as e:
+        print(f"Failed to fetch {url}: {e}")
         return None
 
-def crawl_website(url, headers=None):
-    page_content = fetch_page(url, headers)
-    if page_content:
-        soup = BeautifulSoup(page_content, 'html.parser')
-        
-        # Extract page title
-        page_title = soup.title.string.strip() if soup.title else 'No title found'
-        print(f'Title of the page: {page_title}')
-        
-        # Extract all links
-        links = [link.get('href') for link in soup.find_all('a') if link.get('href')]
-        print(f'Links found ({len(links)}):')
-        for link in links:
-            print(link)
-        
-        # Extract all images
-        images = [img.get('src') for img in soup.find_all('img') if img.get('src')]
-        print(f'Images found ({len(images)}):')
-        for img in images:
-            print(img)
+def parse_html(content):
+    return BeautifulSoup(content, 'html.parser') if content else None
 
-        # You can add more extraction logic here for other elements like text, metadata, etc.
+def extract_links(soup, base_url):
+    links = []
+    if soup:
+        for link in soup.find_all('a', href=True):
+            href = link.get('href')
+            if href:
+                full_url = urljoin(base_url, href)
+                links.append(full_url)
+    return links
 
-        return soup
+def extract_images(soup, base_url):
+    images = []
+    if soup:
+        for img in soup.find_all('img', src=True):
+            src = img.get('src')
+            if src:
+                full_url = urljoin(base_url, src)
+                images.append(full_url)
+    return images
 
-    return None
+def crawl_website(url):
+    content = fetch_page(url)
+    if content:
+        soup = parse_html(content)
+        if soup:
+            base_url = url
+            links = extract_links(soup, base_url)
+            images = extract_images(soup, base_url)
+            return soup, links, images
+    return None, [], []
