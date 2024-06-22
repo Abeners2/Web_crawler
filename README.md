@@ -28,9 +28,9 @@ Execute o script com a URL alvo como argumento da linha de comando:
 python run_crawler.py http://www.exemplo.com
 ```
 ## Funcionalidades
-°Busca recursiva de até uma certa profundidade.
-°Análise de tecnologias usadas como JavaScript, CSS e bancos de dados.
-°Identificação de páginas de login.
+- Busca recursiva de até uma certa profundidade.
+- Análise de tecnologias usadas como JavaScript, CSS e bancos de dados.
+- Identificação de páginas de login.
 
 #### Licença
 Este projeto é distribuído sob a [MIT License](LICENSE). Ao usar este software, você concorda com os termos e assume toda a responsabilidade pelo seu uso.
